@@ -67,6 +67,7 @@ Role Variables
 | template_operating_system | UNDEF | Operating system of the template like: other, rhel_7x64, debian_7, see others in ovirt_template module. |
 | glance_image_provider        | UNDEF (mandatory if qcow_url is not used)            | Name of the glance image provider.                    |
 | glance_image            | UNDEF (mandatory if qcow_url is not used)               | This parameter specifies the name of disk in glance provider to be imported as template. |
+| qcow_after_download_tasks | UNDEF          | Works only with qcow image. Specify a path to Ansible tasks file, which should be executed right after the qcow image has been downloaded. This can be used for example for extracting the image. See example below. |
 | template_prerequisites_tasks | UNDEF | Works only with qcow image. Specify a path to Ansible tasks file, which should be executed on virtual machine before creating a template from it. Note that qcow image must contain guest agent which reports IP address. |
 
 The `template_disks` List of dictionaries can contain following attributes:
@@ -135,6 +136,18 @@ Example Playbook
 
   roles:
     - ovirt-image-template
+```
+
+Example of `qcow_after_download_tasks` task file
+------------------------------------------------
+```yaml
+---
+- name: Extract downloaded QCOW image
+  command: "/usr/bin/unxz --force --keep {{ qcow_image }}"
+
+- name: Set qcow_image to new value
+  set_fact:
+    qcow_image: "{{ (qcow_image | splitext)[0] }}"
 ```
 
 [![asciicast](https://asciinema.org/a/111478.png)](https://asciinema.org/a/111478)
